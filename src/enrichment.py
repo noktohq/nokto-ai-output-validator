@@ -1,4 +1,4 @@
-﻿"""
+"""
 AI enrichment helper.
 
 Calls an LLM to generate structured product content (description + tags),
@@ -65,7 +65,7 @@ Task:
 1. Write a short product description (2-3 sentences). Be factual and specific.
 2. Generate 5-10 relevant tags (lowercase, comma-separated).
 
-Reply ONLY with valid JSON â€” no explanation:
+Reply ONLY with valid JSON — no explanation:
 {{
   "body_html": "<p>Description here.</p>",
   "tags": ["tag1", "tag2"]

@@ -1,4 +1,4 @@
-﻿# nokto-ai-output-validator
+# nokto-ai-output-validator
 
 Validates structured output from LLM calls before it reaches production. Catches malformed JSON, missing required fields, wrong types, enum violations, and unfilled `{{PLACEHOLDER}}` tokens.
 
@@ -27,7 +27,7 @@ schema = OutputSchema(
 result = validate_output(llm_response_text, schema)
 
 if result.status == Status.BLOCKED:
-    print("Output contains unfilled placeholders â€” stopping.")
+    print("Output contains unfilled placeholders — stopping.")
 elif not result.ok:
     for error in result.errors:
         print(f"Validation error: {error}")
