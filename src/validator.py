@@ -1,7 +1,7 @@
-﻿"""
+"""
 AI output validator.
 
-Validates structured output from LLM calls â€” checks JSON shape, required fields,
+Validates structured output from LLM calls — checks JSON shape, required fields,
 enum values, and detects unfilled template placeholders before the output is used.
 """
 
@@ -114,7 +114,7 @@ def validate_output(
 
 
 def validate_json_output(raw: str, required_keys: list[str]) -> ValidationResult:
-    """Convenience wrapper â€” validate that a JSON object has all required keys."""
+    """Convenience wrapper — validate that a JSON object has all required keys."""
     schema = OutputSchema(
         required_fields=[FieldRule(name=k) for k in required_keys],
     )

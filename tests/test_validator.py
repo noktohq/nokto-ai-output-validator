@@ -1,4 +1,4 @@
-﻿"""Tests for the AI output validator."""
+"""Tests for the AI output validator."""
 
 import json
 import pytest
@@ -16,7 +16,7 @@ def _json(obj: dict) -> str:
     return json.dumps(obj)
 
 
-# â”€â”€ JSON parse â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ── JSON parse ───────────────────────────────────────────────────────────────
 
 
 def test_invalid_json_returns_fail():
@@ -30,7 +30,7 @@ def test_json_array_returns_fail():
     assert result.status == Status.FAIL
 
 
-# â”€â”€ Placeholder detection â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ── Placeholder detection ────────────────────────────────────────────────────
 
 
 def test_unfilled_placeholder_returns_blocked():
@@ -51,7 +51,7 @@ def test_placeholder_check_disabled():
     assert result.status == Status.PASS
 
 
-# â”€â”€ Required fields â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ── Required fields ──────────────────────────────────────────────────────────
 
 
 def test_missing_required_field():
@@ -95,7 +95,7 @@ def test_allowed_values_accepted():
     assert result.status == Status.PASS
 
 
-# â”€â”€ validate_json_output convenience â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ── validate_json_output convenience ────────────────────────────────────────
 
 
 def test_validate_json_output_all_keys_present():
