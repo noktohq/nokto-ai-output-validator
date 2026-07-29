@@ -5,6 +5,8 @@ Validates structured output from LLM calls — checks JSON shape, required field
 enum values, and detects unfilled template placeholders before the output is used.
 """
 
+from __future__ import annotations
+
 import json
 import re
 from dataclasses import dataclass, field
