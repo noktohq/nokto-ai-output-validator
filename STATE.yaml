@@ -11,25 +11,25 @@ waiting: []
 blockers: []
 decisions_needed: []
 done:
-- what: SECURITY.md, FUNDING.yml, sikkerhetsgrenser
-  at: '2026-09-11'
-  evidence: 'PR #3'
+  - what: SECURITY.md, FUNDING.yml, sikkerhetsgrenser
+    at: '2026-09-11'
+    evidence: 'PR #3'
 milestones:
-- id: v1
-  title: Validator + enrichment-helper
-  status: done
-  date: '2026-06-23'
-  evidence: commit dc4f53a
-- id: tester
-  title: 11 tester grønne (importfeil rettet)
-  status: done
-  date: '2026-07-29'
-  evidence: commit 8473319
-- id: security-md
-  title: SECURITY.md + Evidence
-  status: done
-  date: '2026-09-11'
-  evidence: 'PR #3'
+  - id: v1
+    title: Validator + enrichment-helper
+    status: done
+    date: '2026-06-23'
+    evidence: commit dc4f53a
+  - id: tester
+    title: 11 tester grønne (importfeil rettet)
+    status: done
+    date: '2026-07-29'
+    evidence: commit 8473319
+  - id: security-md
+    title: SECURITY.md + Evidence
+    status: done
+    date: '2026-09-11'
+    evidence: 'PR #3'
 environment:
   runtime: Python 3.12; pytest (enrichment.py uten testdekning)
   deploy: pip/npm — bibliotek, ingen deploy
@@ -44,6 +44,6 @@ last_session: null
 security_findings: []
 updated_at: '2026-09-21T05:37:39Z'
 sources:
-- README.md
-- commits
-- GitHub-snapshot 2026-09-21
+  - README.md
+  - commits
+  - GitHub-snapshot 2026-09-21
