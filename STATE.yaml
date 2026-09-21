@@ -1,0 +1,49 @@
+# STATE.yaml — levende status for dette repoet (NOKTO CONTROL TOWER).
+# Schema: nokto-ops/control/schema/state.schema.json. Oppdateres av `nokto stop` — ikke dupliser i README.
+schema_version: 1
+project: nokto-ai-output-validator — Validerer strukturert LLM-output før bruk (MIT)
+repo: noktohq/nokto-ai-output-validator
+state: maintenance
+phase: publisert, vedlikehold
+now: null
+next: []
+waiting: []
+blockers: []
+decisions_needed: []
+done:
+  - what: SECURITY.md, FUNDING.yml, sikkerhetsgrenser
+    at: '2026-09-11'
+    evidence: 'PR #3'
+milestones:
+  - id: v1
+    title: Validator + enrichment-helper
+    status: done
+    date: '2026-06-23'
+    evidence: commit dc4f53a
+  - id: tester
+    title: 11 tester grønne (importfeil rettet)
+    status: done
+    date: '2026-07-29'
+    evidence: commit 8473319
+  - id: security-md
+    title: SECURITY.md + Evidence
+    status: done
+    date: '2026-09-11'
+    evidence: 'PR #3'
+environment:
+  runtime: Python 3.12; pytest (enrichment.py uten testdekning)
+  deploy: pip/npm — bibliotek, ingen deploy
+  url: https://github.com/noktohq/nokto-ai-output-validator
+  notes: null
+production_status: n/a
+production_note: Bibliotek. Publisert som kildekode på GitHub.
+branch: main
+last_verified_commit: 08439c9
+last_checkpoint: null
+last_session: null
+security_findings: []
+updated_at: '2026-09-21T05:37:39Z'
+sources:
+  - README.md
+  - commits
+  - GitHub-snapshot 2026-09-21
