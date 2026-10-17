@@ -8,6 +8,7 @@ enum values, and detects unfilled template placeholders before the output is use
 from __future__ import annotations
 
 import json
+import math
 import re
 from dataclasses import dataclass, field
 from enum import Enum
@@ -22,12 +23,26 @@ class Status(str, Enum):
 
 @dataclass
 class FieldRule:
-    """Declares a required field in an AI output dict."""
+    """Declares a field in an AI output dict.
+
+    - ``required``: the key must be present (default). ``required=False``
+      allows the key to be absent; a present value is still checked.
+    - ``nullable``: the value may be JSON ``null``. It does not make the key
+      optional — a missing key still fails unless ``required=False``.
+    - ``type``: expected Python type (or tuple of types). ``bool`` is only
+      accepted when ``bool`` (or ``object``) is listed explicitly, so
+      ``type=int`` / ``type=float`` reject ``true``/``false``.
+    - ``allowed_values``: enum check; ``true``/``false`` only match booleans.
+    - ``item_type``: when set, the value must be a JSON array whose items all
+      match this type (same bool rule as ``type``).
+    """
 
     name: str
-    type: type | None = None
+    type: type | tuple[type, ...] | None = None
     allowed_values: list[Any] | None = None
     nullable: bool = False
+    required: bool = True
+    item_type: type | tuple[type, ...] | None = None
 
 
 @dataclass
@@ -52,6 +67,56 @@ class ValidationResult:
 _PLACEHOLDER_RE = re.compile(r"\{\{[A-Z_]+\}\}")
 
 
+def _reject_constant(name: str) -> Any:
+    raise ValueError(f"non-finite number {name} is not valid JSON")
+
+
+def _parse_finite_float(text: str) -> float:
+    value = float(text)
+    if not math.isfinite(value):
+        raise ValueError(f"number {text} is out of range")
+    return value
+
+
+def _loads(raw: str | bytes) -> Any:
+    """json.loads that rejects NaN, Infinity and floats that overflow to inf."""
+    return json.loads(
+        raw,
+        parse_constant=_reject_constant,
+        parse_float=_parse_finite_float,
+    )
+
+
+def _type_name(expected: type | tuple[type, ...]) -> str:
+    if isinstance(expected, tuple):
+        return " | ".join(_type_name(t) for t in expected)
+    return getattr(expected, "__name__", repr(expected))
+
+
+def _bool_allowed(expected: type | tuple[type, ...]) -> bool:
+    types = expected if isinstance(expected, tuple) else (expected,)
+    return any(t is bool or t is object for t in types)
+
+
+def _matches_type(value: Any, expected: type | tuple[type, ...]) -> bool:
+    if not isinstance(value, expected):
+        return False
+    # bool is a subclass of int in Python; JSON true/false is not a number.
+    if isinstance(value, bool) and not _bool_allowed(expected):
+        return False
+    return True
+
+
+def _is_allowed(value: Any, allowed_values: list[Any]) -> bool:
+    for allowed in allowed_values:
+        # True == 1 and False == 0 in Python; keep booleans and numbers apart.
+        if isinstance(value, bool) != isinstance(allowed, bool):
+            continue
+        if value == allowed:
+            return True
+    return False
+
+
 def validate_output(
     raw: str,
     schema: OutputSchema,
@@ -59,17 +124,19 @@ def validate_output(
     """
     Validate a raw JSON string against an OutputSchema.
 
-    Returns a ValidationResult. Sets status to FAIL if any required field is
-    missing or has the wrong type/value. Sets BLOCKED if the output contains
-    unfilled {{PLACEHOLDER}} tokens.
+    Returns a ValidationResult. Sets status to FAIL if the JSON is invalid
+    (including NaN/Infinity or numbers outside the float range), or if a
+    required field is missing, null without ``nullable=True``, or has the
+    wrong type/value. Sets BLOCKED if the output contains unfilled
+    {{PLACEHOLDER}} tokens.
     """
     errors: list[str] = []
     warnings: list[str] = []
 
     # Parse JSON
     try:
-        data = json.loads(raw)
-    except json.JSONDecodeError as exc:
+        data = _loads(raw)
+    except (ValueError, RecursionError) as exc:
         return ValidationResult(
             status=Status.FAIL,
             errors=[f"Invalid JSON: {exc}"],
@@ -91,21 +158,44 @@ def validate_output(
 
     # Field validation
     for rule in schema.required_fields:
-        value = data.get(rule.name)
-
-        if value is None:
-            if not rule.nullable:
+        if rule.name not in data:
+            if rule.required:
                 errors.append(f"Missing required field '{rule.name}'.")
             continue
 
-        if rule.type is not None and not isinstance(value, rule.type):
+        value = data[rule.name]
+
+        if value is None:
+            if not rule.nullable:
+                errors.append(f"Field '{rule.name}' is null but not nullable.")
+            continue
+
+        if rule.type is not None and not _matches_type(value, rule.type):
             errors.append(
-                f"Field '{rule.name}' must be {rule.type.__name__}, "
+                f"Field '{rule.name}' must be {_type_name(rule.type)}, "
                 f"got {type(value).__name__}."
             )
             continue
 
-        if rule.allowed_values is not None and value not in rule.allowed_values:
+        if rule.item_type is not None:
+            if not isinstance(value, list):
+                errors.append(
+                    f"Field '{rule.name}' must be list, got {type(value).__name__}."
+                )
+                continue
+            bad_items = [
+                f"Field '{rule.name}[{i}]' must be {_type_name(rule.item_type)}, "
+                f"got {type(item).__name__}."
+                for i, item in enumerate(value)
+                if not _matches_type(item, rule.item_type)
+            ]
+            if bad_items:
+                errors.extend(bad_items)
+                continue
+
+        if rule.allowed_values is not None and not _is_allowed(
+            value, rule.allowed_values
+        ):
             errors.append(
                 f"Field '{rule.name}' has value {value!r}, "
                 f"expected one of {rule.allowed_values}."
@@ -121,4 +211,3 @@ def validate_json_output(raw: str, required_keys: list[str]) -> ValidationResult
         required_fields=[FieldRule(name=k) for k in required_keys],
     )
     return validate_output(raw, schema)
-
